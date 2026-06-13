@@ -18,11 +18,11 @@ const FraudAlertScreen = () => {
     <div style={{ 
       backgroundColor: '#0F1B2D', 
       fontFamily: 'sans-serif', 
-      maxWidth: '390px', 
-      margin: '0 auto', 
-      height: '100vh', 
+      width: '100%',
+      padding: '20px',     
       position: 'relative', 
-      overflow: 'hidden' 
+      overflow: 'hidden',
+      borderRadius: '20px'
     }}>
       {/* Background glow */}
       <div style={{ 
@@ -39,10 +39,9 @@ const FraudAlertScreen = () => {
       <div style={{ 
         position: 'relative', 
         zIndex: 1, 
-        padding: '24px 20px', 
+        padding: '24px', 
         display: 'flex', 
-        flexDirection: 'column', 
-        height: '100%',
+        flexDirection: 'column',
         boxSizing: 'border-box'
       }}>
         
@@ -110,7 +109,6 @@ const FraudAlertScreen = () => {
           </p>
         </div>
 
-        <div style={{ flexGrow: 1 }}></div>
 
         {/* Buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '20px' }}>

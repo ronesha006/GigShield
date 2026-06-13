@@ -60,12 +60,11 @@ const GovSchemesCard = () => {
     <div style={{
       backgroundColor: '#FFF8ED',
       fontFamily: 'sans-serif',
-      maxWidth: '390px',
-      margin: '0 auto',
-      minHeight: '100vh',
-      padding: '20px 16px',
+      width: '100%',
+      padding: '24px',
       boxSizing: 'border-box',
-      position: 'relative'
+      position: 'relative',
+      borderRadius: '20px'
     }}>
       {/* Bad Day Mode Banner */}
       <div style={{
@@ -183,8 +182,7 @@ const GovSchemesCard = () => {
           style={{
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
             backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100,
-            display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-            maxWidth: '390px', margin: '0 auto'
+            display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'
           }}
         >
           {/* Click away area to close */}
