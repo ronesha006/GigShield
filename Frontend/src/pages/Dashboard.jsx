@@ -1,8 +1,26 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import API from "../api/api";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  
+  const [insights, setInsights] = useState(null);
 
+  useEffect(() => {
+    const fetchInsights = async () => {
+      try{
+        const response = await API.get("/insights");
+        setInsights(response.data);
+      }
+      catch(error){
+        console.log(error);
+      }
+    };
+
+    fetchInsights();
+  }, []);
+  
   const recentLogs = [
     { date: "13 Jun", earned: 800, spent: 450 },
     { date: "12 Jun", earned: 650, spent: 300 },
@@ -12,8 +30,13 @@ export default function Dashboard() {
   const bufferCurrent = 1200;
   const bufferTarget = 2400;
 
-  const bufferPercent =
-    (bufferCurrent / bufferTarget) * 100;
+  const bufferPercent = (bufferCurrent / bufferTarget) * 100;
+
+  if (!insights){
+    return (
+      <div className="text-white"> Loading... </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
@@ -35,21 +58,21 @@ export default function Dashboard() {
           <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6">
             <h3 className="text-gray-300">Income</h3>
             <p className="text-3xl font-bold text-green-400">
-              ₹800
+              ₹{insights.totalIncome}
             </p>
           </div>
 
           <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6">
             <h3 className="text-gray-300">Expense</h3>
             <p className="text-3xl font-bold text-red-400">
-              ₹450
+              ₹{insights.totalExpense}
             </p>
           </div>
 
           <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6">
             <h3 className="text-gray-300">Remaining</h3>
             <p className="text-3xl font-bold text-white">
-              ₹350
+              ₹{insights.remaining}
             </p>
           </div>
 
@@ -64,7 +87,7 @@ export default function Dashboard() {
           </h2>
 
           <p className="text-5xl font-bold text-emerald-400 mt-4">
-            ₹300
+            ₹{insights.spendLimit}
           </p>
 
         </div>

@@ -1,6 +1,10 @@
 import { useState } from "react";
+import API from "../api/api";
+import { useNavigate } from "react-router-dom";
 
 export default function DailyLog() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     earned: "",
     food: "",
@@ -22,22 +26,26 @@ export default function DailyLog() {
     Number(formData.medical || 0) +
     Number(formData.other || 0);
 
-  const handleSubmit = () => {
-    const log = {
-      date: new Date().toISOString().split("T")[0],
-      earned: Number(formData.earned),
-      expenses: {
+  const handleSubmit = async () => {
+    try{
+      await API.post("/log-income", {
+        amount: Number(formData.earned),
+      });
+
+      await API.post("/log-expense", {
         food: Number(formData.food),
         transport: Number(formData.transport),
         medical: Number(formData.medical),
         other: Number(formData.other),
-      },
-      totalExpense,
-    };
+      });
 
-    console.log(log);
+      navigate("/");
 
-    alert("Daily log saved!");
+    }
+    catch(error){
+      console.log(error);
+      alert("Failed to save data");
+    }
   };
 
   return (
