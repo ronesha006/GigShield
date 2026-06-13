@@ -1,61 +1,65 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import API from "../api/api";
 
 export default function SavingsGoal() {
+  const navigate = useNavigate();
+
   const [goalName, setGoalName] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
 
-  // Pretend this came from backend insights
-  const safeSavingPerDay = 300;
-  const safeSpendPerDay = 500;
-
-  const [dailySaving, setDailySaving] = useState(safeSavingPerDay);
-  const [days, setDays] = useState(0);
-
-  const [savedSoFar, setSavedSoFar] = useState(1500);
+  const [data, setData] = useState(null);
 
   useEffect(() => {
-    if (targetAmount && dailySaving) {
-      setDays(
-        Math.ceil(Number(targetAmount) / Number(dailySaving))
-      );
-    }
-  }, [targetAmount]);
+    const fetchData = async () => {
+      try {
+        const res = await API.get("/dashboard");
+        setData(res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
 
-  const handleDailySavingChange = (value) => {
-    setDailySaving(value);
+    fetchData();
+  }, []);
 
-    if (targetAmount && value) {
-      setDays(
-        Math.ceil(Number(targetAmount) / Number(value))
-      );
-    }
-  };
+  if (!data) {
+    return <div className="text-white p-6">Loading...</div>;
+  }
 
-  const handleDaysChange = (value) => {
-    setDays(value);
+  const safeSavingPerDay = data.spendLimit || 0;
+  const savedSoFar = data.goals?.[0]?.saved || 0;
 
-    if (targetAmount && value) {
-      setDailySaving(
-        Math.ceil(Number(targetAmount) / Number(value))
-      );
-    }
-  };
+  const estimatedDays =
+    targetAmount && safeSavingPerDay
+      ? Math.ceil(Number(targetAmount) / safeSavingPerDay)
+      : 0;
+
+  const optimisticDays =
+    targetAmount && safeSavingPerDay
+      ? Math.ceil(Number(targetAmount) / (safeSavingPerDay + 100))
+      : 0;
+
+  const daysSavedEarly = estimatedDays - optimisticDays;
 
   const progress =
     targetAmount > 0
-      ? Math.min(
-          (savedSoFar / Number(targetAmount)) * 100,
-          100
-        )
+      ? Math.min((savedSoFar / Number(targetAmount)) * 100, 100)
       : 0;
 
-  const daysSavedEarly =
-    Math.floor(
-      Number(targetAmount) / dailySaving
-    ) -
-    Math.floor(
-      Number(targetAmount) / (dailySaving + 100)
-    );
+  const handleSubmit = async () => {
+    try {
+      await API.post("/create-goal", {
+        name: goalName,
+        target: Number(targetAmount),
+      });
+
+      navigate("/");
+    } catch (err) {
+      console.log(err);
+      alert("Failed to save goal");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-900 text-white p-6">
@@ -67,86 +71,47 @@ export default function SavingsGoal() {
 
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 space-y-6">
 
+          {/* Goal Name */}
           <div>
-            <label className="block mb-2">
-              Goal Name
-            </label>
-
+            <label className="block mb-2">Goal Name</label>
             <input
-              type="text"
               value={goalName}
-              onChange={(e) =>
-                setGoalName(e.target.value)
-              }
-              placeholder="New Bicycle"
+              onChange={(e) => setGoalName(e.target.value)}
               className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700"
+              placeholder="New Bicycle"
             />
           </div>
 
+          {/* Target */}
           <div>
-            <label className="block mb-2">
-              Target Amount (₹)
-            </label>
-
+            <label className="block mb-2">Target Amount (₹)</label>
             <input
               type="number"
               value={targetAmount}
-              onChange={(e) =>
-                setTargetAmount(e.target.value)
-              }
+              onChange={(e) => setTargetAmount(e.target.value)}
+              className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700"
               placeholder="5000"
-              className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700"
             />
           </div>
 
-          <div>
-            <label className="block mb-2">
-              Daily Saving (₹)
-            </label>
-
-            <input
-              type="number"
-              value={dailySaving}
-              onChange={(e) =>
-                handleDailySavingChange(
-                  e.target.value
-                )
-              }
-              className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2">
-              Estimated Days
-            </label>
-
-            <input
-              type="number"
-              value={days}
-              onChange={(e) =>
-                handleDaysChange(
-                  e.target.value
-                )
-              }
-              className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700"
-            />
-          </div>
-
+          {/* Live Info */}
           <div className="bg-slate-800 p-4 rounded-xl">
-            <p className="text-slate-300">
-              Average Safe Spend Per Day
-            </p>
-
+            <p className="text-slate-300">Safe Saving Per Day</p>
             <p className="text-2xl font-bold">
-              ₹{safeSpendPerDay}
+              ₹{safeSavingPerDay}
             </p>
           </div>
 
+          {/* Estimated Days */}
+          <div className="bg-slate-800 p-4 rounded-xl">
+            <p>Estimated Days</p>
+            <p className="text-xl font-bold">{estimatedDays}</p>
+          </div>
+
+          {/* Progress */}
           <div>
             <div className="flex justify-between mb-2">
               <span>Progress</span>
-
               <span>
                 ₹{savedSoFar} / ₹{targetAmount || 0}
               </span>
@@ -155,9 +120,7 @@ export default function SavingsGoal() {
             <div className="w-full h-4 bg-slate-700 rounded-full overflow-hidden">
               <div
                 className="h-full bg-green-500 transition-all duration-500"
-                style={{
-                  width: `${progress}%`,
-                }}
+                style={{ width: `${progress}%` }}
               />
             </div>
 
@@ -166,6 +129,7 @@ export default function SavingsGoal() {
             </p>
           </div>
 
+          {/* Insight */}
           <div className="bg-green-900/30 border border-green-700 rounded-xl p-4">
             <p className="font-semibold mb-2">
               💡 Smart Insight
@@ -181,7 +145,9 @@ export default function SavingsGoal() {
             </p>
           </div>
 
+          {/* Save */}
           <button
+            onClick={handleSubmit}
             className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 transition"
           >
             Save Goal

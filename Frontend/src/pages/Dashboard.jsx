@@ -1,180 +1,94 @@
-import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import API from "../api/api";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  
-  const [insights, setInsights] = useState(null);
+  const [data, setData] = useState(null);
 
   useEffect(() => {
-    const fetchInsights = async () => {
-      try{
-        const response = await API.get("/insights");
-        setInsights(response.data);
-      }
-      catch(error){
-        console.log(error);
-      }
+    const fetchData = async () => {
+      const res = await API.get("/dashboard");
+      setData(res.data);
     };
 
-    fetchInsights();
+    fetchData();
   }, []);
-  
-  const recentLogs = [
-    { date: "13 Jun", earned: 800, spent: 450 },
-    { date: "12 Jun", earned: 650, spent: 300 },
-    { date: "11 Jun", earned: 0, spent: 180 },
-  ];
 
-  const bufferCurrent = 1200;
-  const bufferTarget = 2400;
-
-  const bufferPercent = (bufferCurrent / bufferTarget) * 100;
-
-  if (!insights){
-    return (
-      <div className="text-white"> Loading... </div>
-    )
+  if (!data) {
+    return <div className="text-white">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+    <div className="min-h-screen bg-slate-900 text-white p-6">
 
-      <div className="max-w-5xl mx-auto">
+      <h1 className="text-3xl font-bold">
+        Dashboard
+      </h1>
 
-        <h1 className="text-4xl font-bold text-white">
-          Hello Ramu 👋
-        </h1>
+      {/* Summary */}
+      <div className="grid md:grid-cols-3 gap-4 mt-6">
 
-        <p className="text-gray-400 mt-2">
-          Here's your financial snapshot today
+        <Card title="Income" value={data.totalIncome} />
+        <Card title="Expense" value={data.totalExpense} />
+        <Card title="Remaining" value={data.remaining} />
+
+      </div>
+
+      {/* Spend Limit */}
+      <div className="mt-6 bg-white/10 p-6 rounded-xl">
+        <h2>Spend Limit</h2>
+        <p className="text-4xl text-green-400">
+          ₹{data.spendLimit}
         </p>
+      </div>
 
-        {/* Summary Cards */}
+      {/* AI */}
+      <div className="mt-6 bg-white/10 p-6 rounded-xl">
+        <h2>AI Insight</h2>
+        <p>{data.aiNudge}</p>
+      </div>
 
-        <div className="grid md:grid-cols-3 gap-4 mt-8">
+      {/* Goals */}
+      <div className="mt-6">
+        <h2 className="text-xl mb-2">Goals</h2>
 
-          <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6">
-            <h3 className="text-gray-300">Income</h3>
-            <p className="text-3xl font-bold text-green-400">
-              ₹{insights.totalIncome}
-            </p>
+        {data.goals.map((g) => (
+          <div key={g.id} className="bg-white/10 p-3 rounded mb-2">
+            <p>{g.name}</p>
+            <p>{g.saved} / {g.target}</p>
           </div>
+        ))}
+      </div>
 
-          <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6">
-            <h3 className="text-gray-300">Expense</h3>
-            <p className="text-3xl font-bold text-red-400">
-              ₹{insights.totalExpense}
-            </p>
-          </div>
-
-          <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6">
-            <h3 className="text-gray-300">Remaining</h3>
-            <p className="text-3xl font-bold text-white">
-              ₹{insights.remaining}
-            </p>
-          </div>
-
-        </div>
-
-        {/* Spend Limit */}
-
-        <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6 mt-6">
-
-          <h2 className="text-white text-xl font-semibold">
-            Today's Safe Spend Limit
-          </h2>
-
-          <p className="text-5xl font-bold text-emerald-400 mt-4">
-            ₹{insights.spendLimit}
-          </p>
-
-        </div>
-
-        {/* Emergency Buffer */}
-
-        <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6 mt-6">
-
-          <h2 className="text-white text-xl font-semibold">
-            Emergency Buffer
-          </h2>
-
-          <p className="text-gray-300 mt-2">
-            ₹1200 / ₹2400
-          </p>
-
-          <div className="w-full bg-slate-700 rounded-full h-4 mt-4">
-
-            <div
-              className="bg-emerald-500 h-4 rounded-full"
-              style={{
-                width: `${bufferPercent}%`,
-              }}
-            />
-
-          </div>
-
-          <p className="text-gray-300 mt-2">
-            {Math.round(bufferPercent)}% Complete
-          </p>
-
-        </div>
-
-        {/* AI Advice */}
-
-        <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6 mt-6">
-
-          <h2 className="text-white text-xl font-semibold">
-            AI Advice
-          </h2>
-
-          <p className="text-gray-300 mt-3">
-            You earned less than usual yesterday.
-            Try keeping food expenses below ₹150 today.
-          </p>
-
-        </div>
-
-        {/* Recent Logs */}
-
-        <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6 mt-6">
-
-          <h2 className="text-white text-xl font-semibold mb-4">
-            Recent Records
-          </h2>
-
-          {recentLogs.map((log, index) => (
-            <div
-              key={index}
-              className="flex justify-between border-b border-white/10 py-3 text-gray-300"
-            >
-              <span>{log.date}</span>
-              <span>₹{log.earned}</span>
-              <span>₹{log.spent}</span>
-            </div>
-          ))}
-
-        </div>
-
-        {/* Add Log Button */}
+      {/* Buttons */}
+      <div className="flex gap-3 mt-6">
 
         <button
           onClick={() => navigate("/add-log")}
-          className="fixed bottom-8 right-8 bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-4 rounded-full shadow-xl transition-all"
+          className="bg-green-500 px-4 py-2 rounded"
         >
-          + Add Today's Log
+          Add Log
         </button>
 
         <button
           onClick={() => navigate("/savings-goal")}
-          className="bg-green-600 px-4 py-2 rounded-lg"
+          className="bg-blue-500 px-4 py-2 rounded"
         >
-          Create Savings Goal
+          Savings Goal
         </button>
 
       </div>
 
+    </div>
+  );
+}
+
+function Card({ title, value }) {
+  return (
+    <div className="bg-white/10 p-4 rounded-xl">
+      <h3 className="text-gray-300">{title}</h3>
+      <p className="text-xl font-bold">₹{value}</p>
     </div>
   );
 }
