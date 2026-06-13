@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import DailyLog from "./pages/DailyLog"
 import Dashboard from "./pages/Dashboard";
 import Scheme from "./pages/Scheme";
+import SavingsGoal from "./pages/SavingsGoal";
 
 function App(){
   return (
@@ -11,6 +12,7 @@ function App(){
           <Route path="/" element={<Dashboard />} />
           <Route path="/add-log" element={<DailyLog />} />
           <Route path="/scheme" element={<Scheme />} />
+          <Route path="/savings-goal" element={<SavingsGoal />} />
         </Routes>
       </BrowserRouter>
     </div>
