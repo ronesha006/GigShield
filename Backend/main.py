@@ -1,3 +1,8 @@
+import anthropic
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -60,15 +65,22 @@ def log_expense(data: ExpenseLog):
 
 @app.get("/insights")
 def get_insights():
-	total_income = sum(item["amount"] for item in income_logs)
-	total_expense = sum(item["total"] for item in expense_logs)
-	remaining = (total_income - total_expense)
-	spend_limit = remaining * 0.5
-	
-	return{
-		"totalIncome": total_income,
-		"totalExpense": total_expense,
-		"remaining": remaining,
-		"spendLimit": spend_limit
+    total_income = sum(item["amount"] for item in income_logs)
+    total_expense = sum(item["total"] for item in expense_logs)
+    remaining = (total_income - total_expense)
+    spend_limit = remaining * 0.5
+
+    # Mock AI nudge for demo (replace with Claude API when credits available)
+    ai_nudges = (
+        f"You've spent ₹{total_expense} today — good control! "
+        f"Try to keep tomorrow's spending under ₹{round(spend_limit)}. "
+        "Your emergency buffer is growing — keep logging daily to stay on track."
+    )
+
+    return {
+        "totalIncome": total_income,
+        "totalExpense": total_expense,
+        "remaining": remaining,
+        "spendLimit": spend_limit,
+        "aiNudges": ai_nudges
     }
-	
