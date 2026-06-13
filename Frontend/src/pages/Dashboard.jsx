@@ -166,6 +166,13 @@ export default function Dashboard() {
           + Add Today's Log
         </button>
 
+        <button
+          onClick={() => navigate("/savings-goal")}
+          className="bg-green-600 px-4 py-2 rounded-lg"
+        >
+          Create Savings Goal
+        </button>
+
       </div>
 
     </div>
