@@ -1,3 +1,4 @@
+main.py
 import anthropic
 import os
 from dotenv import load_dotenv
@@ -197,16 +198,19 @@ def add_savings(amount: float):
 
 @app.get("/dashboard")
 def dashboard():
+
     total_income = sum(x["amount"] for x in user_data["income"])
     total_expense = sum(x["total"] for x in user_data["expenses"])
+
     remaining = total_income - total_expense
+    spend_limit = remaining * 0.5
+
+    ai_nudge = (
+        f"You spent ₹{total_expense}. "
+        f"Try to stay under ₹{round(spend_limit)} today. "
+        "Keep building your buffer."
+    )
     
-    if remaining > 0:
-        spend_limit = remaining * 0.5
-        ai_nudge = f"You spent ₹{total_expense}. Try to stay under ₹{round(spend_limit)} today. Keep building your buffer."
-    else:
-        spend_limit = 0
-        ai_nudge = f"⚠️ Alert: You've spent ₹{abs(remaining)} more than you earned. Focus on reducing expenses."
 
     return {
         "totalIncome": total_income,
@@ -243,6 +247,7 @@ def set_savings_percentage(data: SavingsAllocation):
         "percentage": data.percentage
     }
 
+
 @app.post("/allocate-savings")
 def allocate_savings(data: AllocateSavingsRequest):
     """Allocate a specific amount to goals from net savings"""
@@ -261,11 +266,12 @@ def allocate_savings(data: AllocateSavingsRequest):
             "can_allocate": False
         }
     
+    # Check if allocation exceeds 50% of net savings
     fifty_percent = net_savings * 0.5
+    warning = None
     
     if data.amount > fifty_percent and not data.force_override:
         return {
-            "warning": True,
             "message": f"Warning: Allocating ₹{data.amount} is {((data.amount/net_savings)*100):.1f}% of your net savings. This exceeds the recommended 50% limit.",
             "recommended_max": fifty_percent,
             "net_savings": net_savings,
@@ -273,6 +279,7 @@ def allocate_savings(data: AllocateSavingsRequest):
             "exceeds_by": data.amount - fifty_percent
         }
     
+    # Check if user has enough net savings
     if data.amount > net_savings:
         return {
             "error": f"Insufficient net savings. You only have ₹{net_savings} available.",
@@ -280,6 +287,7 @@ def allocate_savings(data: AllocateSavingsRequest):
             "requested_amount": data.amount
         }
     
+    # Allocate to goals (highest priority first)
     remaining = data.amount
     allocated_to = []
     
@@ -306,7 +314,6 @@ def allocate_savings(data: AllocateSavingsRequest):
     
     user_data["allocated_savings"] += data.amount
     _recalculate_available_savings()
-    
     user_data["savings_allocation"]["last_allocation_date"] = datetime.now().isoformat()
     
     return {
@@ -316,8 +323,6 @@ def allocate_savings(data: AllocateSavingsRequest):
         "net_savings": net_savings,
         "allocated_to": allocated_to,
         "remaining_net": net_savings - data.amount,
-        "available_savings": user_data["available_savings"],  # ADD THIS
-        "allocated_savings": user_data["allocated_savings"],  # ADD THIS
         "goals": user_data["goals"]
     }
     
@@ -331,17 +336,14 @@ def savings_overview():
     total_expense = sum(x["total"] for x in user_data["expenses"])
     net_savings = total_income - total_expense
     
-    available = user_data["available_savings"]
-    recommended_save = available * 0.5 if available > 0 else 0
-    aggressive_save = available * 0.7 if available > 0 else 0
-    conservative_save = available * 0.3 if available > 0 else 0
+    recommended_save = net_savings * 0.5  # 50% recommendation
+    aggressive_save = net_savings * 0.7   # 70% aggressive
+    conservative_save = net_savings * 0.3  # 30% conservative
     
     return {
         "total_income": total_income,
         "total_expense": total_expense,
-        "net_savings": net_savings if net_savings > 0 else 0,
-        "available_savings": available, 
-        "allocated_savings": user_data["allocated_savings"], 
+        "net_savings": net_savings,
         "recommendations": {
             "conservative": conservative_save,
             "recommended": recommended_save,
@@ -350,6 +352,7 @@ def savings_overview():
         "current_allocation_percentage": user_data["savings_allocation"]["percentage"],
         "goals": user_data["goals"]
     }
+
 
 @app.get("/income-engine")
 def income_engine():
