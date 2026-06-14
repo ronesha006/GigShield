@@ -55,13 +55,15 @@ def log_income(data: IncomeLog):
 def log_expense(data: ExpenseLog):
     total = (data.food + data.transport + data.medical + data.other)
 	
-    user_data["expense"].append({
-		"food": data.food,
-		"transport": data.transport,
-		"medical": data.medical,
-		"other": data.other,
-		"total": total
-    })
+    expense_entry = {
+        "food": data.food,
+        "transport": data.transport,
+        "medical": data.medical,
+        "other": data.other,
+        "total": total
+    }
+    
+    user_data["expenses"].append(expense_entry)
 	
     return {
 		"message": "Expense logged successfully",
