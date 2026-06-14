@@ -67,7 +67,7 @@ def log_expense(data: ExpenseLog):
 	
     return {
 		"message": "Expense logged successfully",
-		"data": user_data["expense"]
+		"data": user_data["expenses"]
 	}
 
 
