@@ -3,6 +3,7 @@ import DailyLog from "./pages/DailyLog"
 import Dashboard from "./pages/Dashboard";
 import Scheme from "./pages/Scheme";
 import SavingsGoal from "./pages/SavingsGoal";
+import FamilyShield from "./pages/FamilyShield";
 
 function App(){
   return (
@@ -13,6 +14,7 @@ function App(){
           <Route path="/add-log" element={<DailyLog />} />
           <Route path="/scheme" element={<Scheme />} />
           <Route path="/savings-goal" element={<SavingsGoal />} />
+          <Route path="/family-shield" element={<FamilyShield />} />
         </Routes>
       </BrowserRouter>
     </div>

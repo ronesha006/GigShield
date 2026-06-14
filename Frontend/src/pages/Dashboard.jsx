@@ -144,7 +144,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 mt-6">
               <button
                 onClick={() => navigate("/add-log")}
                 className="bg-green-500 px-4 py-2 rounded"
@@ -156,6 +156,13 @@ export default function Dashboard() {
                 className="bg-blue-500 px-4 py-2 rounded"
               >
                 {t('savings_goal')}
+              </button>
+  
+              <button
+                onClick={() => navigate("/family-shield")}
+                className="bg-purple-500 px-4 py-2 rounded"
+              >
+                Family Shield
               </button>
             </div>
           </div>

@@ -15,12 +15,8 @@ const FraudAlertScreen = () => {
   }, [currentScreen]);
 
   const handleNotify = (id) => {
-  setNotifiedContacts(prev => {
-    const updated = new Set(prev);
-    updated.add(id);
-    return updated;
-  });
-};
+    setNotifiedContacts(prev => new Set(prev).add(id));
+  };
 
   const handleReport = () => {
     setCurrentScreen('success');
@@ -37,32 +33,29 @@ const FraudAlertScreen = () => {
   };
 
   return (
-
-    
-
-    <div
-  style={{
-    backgroundColor: '#0F1B2D',
-    fontFamily: 'sans-serif',
-    width: '100%',
-    minHeight: '900px',
-    padding: '20px',
-    position: 'relative',
-    overflow: 'hidden',
-    borderRadius: '20px',
-    color: '#fff'
-  }}
->
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+    <div style={{
+      fontFamily: 'sans-serif',
+      maxWidth: '390px',
+      margin: '0 auto',
+      minHeight: '100vh',
+      backgroundColor: '#f8fafc',
+      position: 'relative',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
       
-      <div style={{ 
-        position: 'relative', 
-        zIndex: 1, 
-        padding: '24px', 
-        display: 'flex', 
-        flexDirection: 'column',
-        boxSizing: 'border-box'
-
+      {/* Header */}
+      <div style={{
+        backgroundColor: '#0F1B2D',
+        color: '#fff',
+        padding: '24px 20px 32px 20px',
+        borderBottomLeftRadius: '24px',
+        borderBottomRightRadius: '24px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+        zIndex: 10,
+        position: 'relative'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
           <i className="ti ti-shield-check" style={{ fontSize: '24px', color: '#2D8A4E' }}></i>
@@ -240,36 +233,16 @@ const FraudAlertScreen = () => {
             <i className="ti ti-check" style={{ fontSize: '48px', strokeWidth: 3 }}></i>
           </div>
           <h2 style={{ margin: '0 0 12px 0', fontSize: '24px', color: '#1e293b', fontWeight: 'bold' }}>Scam Reported</h2>
-          <p
-  style={{
-    margin: '0 0 40px 0',
-    fontSize: '15px',
-    color: '#64748b',
-    lineHeight: '1.6'
-  }}
->
-  Thank you for keeping your family safe.
-  We've flagged this number and alerted Rajan.
-</p>
-
-<button
-  onClick={handleBackToShield}
-  style={{
-    backgroundColor: '#1e293b',
-    color: '#fff',
-    border: 'none',
-    padding: '16px',
-    borderRadius: '12px',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    width: '100%',
-    maxWidth: '300px'
-  }}
->
-  Back to Shield
-</button>
-</div>
+          <p style={{ margin: '0 0 40px 0', fontSize: '15px', color: '#64748b', lineHeight: '1.6' }}>
+            Thank you for keeping your family safe. We've flagged this number and alerted Rajan.
+          </p>
+          <button 
+            onClick={handleBackToShield}
+            style={{ backgroundColor: '#1e293b', color: '#fff', border: 'none', padding: '16px', borderRadius: '12px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', width: '100%' }}
+          >
+            Back to Shield
+          </button>
+        </div>
       </div>
 
       {/* Bottom Tab Bar */}
