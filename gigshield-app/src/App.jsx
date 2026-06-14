@@ -51,6 +51,10 @@ const t = {
 // ==========================================
 const HomeScreen = ({ lang }) => {
   const text = t[lang];
+  const [bufferPercent, setBufferPercent] = useState(() => {
+    const saved = localStorage.getItem('gigshield_buffer');
+    return saved ? Number(saved) : 68;
+  });
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
@@ -69,11 +73,33 @@ const HomeScreen = ({ lang }) => {
             <div style={{ fontSize: '16px', color: '#475569', marginBottom: '24px', fontWeight: '500' }}>{text.safeToSpend}: ₹320</div>
             
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#64748b', marginBottom: '12px', fontWeight: '500' }}>
-              <span>{text.buffer}</span>
-              <span>68% {text.filled}</span>
+              <span>{text.buffer}: ₹{Math.round(3000 * bufferPercent / 100)} / ₹3,000</span>
+              <span>{bufferPercent}% {text.filled}</span>
             </div>
-            <div style={{ width: '100%', backgroundColor: '#f1f5f9', height: '12px', borderRadius: '6px', overflow: 'hidden' }}>
-              <div style={{ width: '68%', backgroundColor: '#185FA5', height: '100%', borderRadius: '6px' }}></div>
+            <div style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+              <input 
+                type="range"
+                min="0"
+                max="100"
+                value={bufferPercent}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setBufferPercent(val);
+                  localStorage.setItem('gigshield_buffer', val);
+                }}
+                style={{
+                  width: '100%',
+                  accentColor: '#185FA5',
+                  cursor: 'pointer',
+                  height: '8px',
+                  borderRadius: '4px',
+                  backgroundColor: '#f1f5f9',
+                  outline: 'none',
+                  border: 'none',
+                  padding: 0,
+                  margin: 0
+                }}
+              />
             </div>
           </div>
 
