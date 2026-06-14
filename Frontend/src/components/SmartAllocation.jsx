@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import API from "../api/api";
+import { useI18n } from '../i18n'
 
 export default function SmartAllocation({ onAllocationComplete }) {
+  const { t } = useI18n();
   const [allocationPercent, setAllocationPercent] = useState(30);
   const [customAmount, setCustomAmount] = useState("");
   const [netSavings, setNetSavings] = useState(0);
@@ -9,16 +11,27 @@ export default function SmartAllocation({ onAllocationComplete }) {
   const [warningData, setWarningData] = useState(null);
   const [savingsData, setSavingsData] = useState(null);
   const [allocationMode, setAllocationMode] = useState("percentage"); // percentage or custom
+  const [badDayMode, setBadDayMode] = useState(false);
 
   useEffect(() => {
     fetchSavingsOverview();
+    fetchIncomeEngine();
   }, []);
+
+  const fetchIncomeEngine = async () => {
+    try {
+      const res = await API.get("/income-engine");
+      setBadDayMode(res.data.bad_day_mode);
+    } catch (err) {
+      console.error("Income engine fetch failed", err);
+    }
+  };
 
   const fetchSavingsOverview = async () => {
     try {
       const res = await API.get("/savings-overview");
       setSavingsData(res.data);
-      setNetSavings(res.data.net_savings);
+      setNetSavings(res.data.net_savings ?? 0);
     } catch (err) {
       console.error(err);
     }
@@ -99,10 +112,10 @@ export default function SmartAllocation({ onAllocationComplete }) {
   };
 
   if (!savingsData) {
-    return <div className="text-white">Loading savings data...</div>;
+    return <div className="text-white">{t('loading') || 'Loading savings data...'}</div>;
   }
 
-  const recommendedAmount = savingsData.recommendations.recommended;
+  const recommendedAmount = savingsData.recommendations?.recommended ?? Math.round(netSavings * 0.5);
   const maxRecommended = netSavings * 0.5;
   const currentAllocation = allocationMode === "percentage" 
     ? (netSavings * allocationPercent) / 100 
@@ -110,11 +123,11 @@ export default function SmartAllocation({ onAllocationComplete }) {
 
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 space-y-6">
-      <h2 className="text-2xl font-bold text-white"> Smart Savings Allocator</h2>
+      <h2 className="text-2xl font-bold text-white"> {t('smart_allocator')}</h2>
       
       {/* Net Savings Display */}
       <div className="bg-green-900/30 border border-green-700 rounded-xl p-4">
-        <p className="text-slate-300">Today's Net Savings</p>
+        <p className="text-slate-300">{t('todays_net')}</p>
         <p className="text-3xl font-bold text-green-400">₹{netSavings.toLocaleString()}</p>
         <p className="text-sm text-slate-400">
           Income: ₹{savingsData.total_income} - Expenses: ₹{savingsData.total_expense}
@@ -149,7 +162,7 @@ export default function SmartAllocation({ onAllocationComplete }) {
       {allocationMode === "percentage" && (
         <div className="space-y-4">
           <div className="flex justify-between">
-            <label className="text-slate-300">Allocation Percentage</label>
+            <label className="text-slate-300">{t('allocation_percentage')}</label>
             <span className="text-2xl font-bold text-blue-400">{allocationPercent}%</span>
           </div>
           
@@ -170,7 +183,7 @@ export default function SmartAllocation({ onAllocationComplete }) {
           />
           
           <div className="flex justify-between text-sm text-slate-400">
-            <span>0% (Save Nothing)</span>
+            <span>0% ({t('no_savings')})</span>
             <span className="text-yellow-400">50% (Recommended)</span>
             <span>100% (All Savings)</span>
           </div>
@@ -180,7 +193,7 @@ export default function SmartAllocation({ onAllocationComplete }) {
       {/* Custom Amount Input */}
       {allocationMode === "custom" && (
         <div>
-          <label className="block mb-2 text-slate-300">Custom Amount (₹)</label>
+          <label className="block mb-2 text-slate-300">{t('custom_amount')} (₹)</label>
           <input
             type="number"
             value={customAmount}
@@ -193,7 +206,7 @@ export default function SmartAllocation({ onAllocationComplete }) {
 
       {/* Current Allocation Preview */}
       <div className="bg-slate-800/50 rounded-xl p-4">
-        <p className="text-slate-300 mb-2">Current Allocation:</p>
+          <p className="text-slate-300 mb-2">{t('allocation_percentage')}:</p>
         <p className="text-xl font-bold">
           ₹{currentAllocation.toLocaleString()}
         </p>
@@ -202,17 +215,17 @@ export default function SmartAllocation({ onAllocationComplete }) {
         </p>
         
         {/* Warning Indicator */}
-        {currentAllocation > maxRecommended && (
+          {currentAllocation > maxRecommended && (
           <div className="mt-2 text-red-400 text-sm flex items-center gap-2">
-            Exceeds recommended 50% limit
+            {t('bad_day_message')}
           </div>
         )}
         
         {/* Recommendation */}
         <div className="mt-3 pt-3 border-t border-slate-700">
-          <p className="text-sm text-green-400">
-             Recommended: Save ₹{recommendedAmount.toLocaleString()} (50%)
-          </p>
+           <p className="text-sm text-green-400">
+             {t('recommended_buffer')}: ₹{recommendedAmount.toLocaleString()} (50%)
+           </p>
         </div>
       </div>
 
@@ -228,10 +241,16 @@ export default function SmartAllocation({ onAllocationComplete }) {
             : "bg-gray-600 cursor-not-allowed"
         }`}
       >
-        {netSavings > 0 
+        {netSavings > 0 && !badDayMode
           ? `Allocate ₹${currentAllocation.toLocaleString()} to Goals`
-          : "No Savings Available"}
+          : badDayMode ? "Bad Day Mode Active - Savings Paused" : "No Savings Available"}
       </button>
+
+        {badDayMode && (
+        <div className="mt-3 p-3 bg-red-800/20 rounded text-red-200">
+          {t('bad_day_message')}
+        </div>
+      )}
 
       {/* Warning Modal */}
       {showWarning && warningData && (

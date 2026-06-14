@@ -6,17 +6,19 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import datetime
+import statistics
+from fastapi import Query
 
 load_dotenv()
 
 app = FastAPI()
 
 app.add_middleware(
-	CORSMiddleware,
-	allow_origins = [ "https://gig-shield-ecru.vercel.app", "http://localhost:5173" ],
-	allow_credentials = True,
-	allow_methods = ["*"],
-	allow_headers = ["*"]
+    CORSMiddleware,
+    allow_origins=["https://gig-shield-ecru.vercel.app", "http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
 )
 
 user_data = {
@@ -32,35 +34,45 @@ user_data = {
 
 @app.get("/")
 def home():
-    return{
+    return {
         "message": "GigShield API is running"
     }
 
+
 class IncomeLog(BaseModel):
-	amount: float
+    amount: float
+
+
+def today_str():
+    return datetime.date.today().isoformat()
+
 
 class ExpenseLog(BaseModel):
-	food: float
-	transport: float
-	medical: float
-	other: float
+    food: float
+    transport: float
+    medical: float
+    other: float
 
 
 @app.post("/log-income")
 def log_income(data: IncomeLog):
-	user_data["income"].append({
-		"amount": data.amount
-	})
+    # store date for each income entry to support the income engine
+    entry = {"amount": data.amount, "date": today_str()}
+    user_data["income"].append(entry)
 
-	return {
-		"message": "Income logged successfully",
-		"data": user_data["income"]
-	}
+    # After logging income, recompute bad day mode flag
+    compute_bad_day_mode()
+
+    return {
+        "message": "Income logged successfully",
+        "data": user_data["income"]
+    }
+
 
 @app.post("/log-expense")
 def log_expense(data: ExpenseLog):
     total = (data.food + data.transport + data.medical + data.other)
-	
+
     expense_entry = {
         "food": data.food,
         "transport": data.transport,
@@ -68,21 +80,23 @@ def log_expense(data: ExpenseLog):
         "other": data.other,
         "total": total
     }
-    
+
     user_data["expenses"].append(expense_entry)
-	
+
     return {
-		"message": "Expense logged successfully",
-		"data": user_data["expenses"]
-	}
+        "message": "Expense logged successfully",
+        "data": user_data["expenses"]
+    }
 
 
 class Goal(BaseModel):
     name: str
     target: float
-    
+
+
 class Reorder(BaseModel):
-     goal_order: list[str]
+    goal_order: list[str]
+
 
 @app.post("/create-goal")
 def create_goal(goal: Goal):
@@ -124,6 +138,7 @@ def update_savings(amount: float):
         user_data["goals"][0]["saved"] += amount
 
     return user_data["goals"]
+
 
 @app.post("/add-savings")
 def add_savings(amount: float):
@@ -171,9 +186,11 @@ def dashboard():
 class SavingsAllocation(BaseModel):
     percentage: int
 
+
 class AllocateSavingsRequest(BaseModel):
     amount: float
     force_override: bool = False  # If user ignores warning
+
 
 @app.post("/set-savings-percentage")
 def set_savings_percentage(data: SavingsAllocation):
@@ -187,6 +204,7 @@ def set_savings_percentage(data: SavingsAllocation):
         "message": f"Savings allocation set to {data.percentage}%",
         "percentage": data.percentage
     }
+
 
 @app.post("/allocate-savings")
 def allocate_savings(data: AllocateSavingsRequest):
@@ -262,7 +280,7 @@ def allocate_savings(data: AllocateSavingsRequest):
         "remaining_net": net_savings - data.amount,
         "goals": user_data["goals"]
     }
-
+    
 @app.get("/savings-overview")
 def savings_overview():
     """Get overview of net savings and allocation recommendations"""
@@ -286,3 +304,166 @@ def savings_overview():
         "current_allocation_percentage": user_data["savings_allocation"]["percentage"],
         "goals": user_data["goals"]
     }
+ 
+ 
+def compute_bad_day_mode():
+    """Set a flag in user_data if there are 2 consecutive zero-income days."""
+    # Build a map of date -> total income for that date
+    income_by_date = {}
+    for inc in user_data["income"]:
+        d = inc.get("date") or today_str()
+        income_by_date.setdefault(d, 0)
+        income_by_date[d] += inc.get("amount", 0)
+
+    # consider last 7 calendar days
+    today = datetime.date.today()
+    consecutive_zero = 0
+    for i in range(0, 7):
+        day = (today - datetime.timedelta(days=i)).isoformat()
+        amt = income_by_date.get(day, 0)
+        if amt == 0:
+            consecutive_zero += 1
+        else:
+            break
+
+    user_data["bad_day_mode"] = consecutive_zero >= 2
+
+
+@app.get("/income-engine")
+def income_engine():
+    """Return 7-day average, per-day flags and a dynamic daily spend limit."""
+    # Build date->income map
+    income_by_date = {}
+    for inc in user_data["income"]:
+        d = inc.get("date") or today_str()
+        income_by_date.setdefault(d, 0)
+        income_by_date[d] += inc.get("amount", 0)
+
+    today = datetime.date.today()
+    last7 = []
+    total = 0
+    for i in range(6, -1, -1):
+        day = (today - datetime.timedelta(days=i)).isoformat()
+        amt = income_by_date.get(day, 0)
+        last7.append({"date": day, "income": amt})
+        total += amt
+
+    seven_day_avg = total / 7 if total else 0
+
+    # Simple dynamic daily spend limit:
+    # take 80% of 7-day average as available for daily spending (conservative)
+    daily_spend_limit = round(seven_day_avg * 0.8, 2)
+
+    # Bad day mode schemes to surface when triggered
+    gov_schemes = []
+    if user_data.get("bad_day_mode"):
+        gov_schemes = [
+            {"name": "PM Jan Dhan Yojana", "desc": "Direct benefit transfer access and small savings"},
+            {"name": "MGNREGA", "desc": "Rural employment guarantee schemes"}
+        ]
+
+    return {
+        "seven_day_avg": seven_day_avg,
+        "last7": last7,
+        "daily_spend_limit": daily_spend_limit,
+        "bad_day_mode": user_data.get("bad_day_mode", False),
+        "gov_schemes": gov_schemes
+    }
+
+
+@app.get("/emergency-buffer")
+def emergency_buffer(multiplier: float = Query(1.5, description="Multiplier for 7-day average")):
+    """Calculate an emergency buffer recommendation based on recent income volatility.
+
+    Strategy:
+    - Build last 14 calendar day incomes
+    - Compute 7-day average and 14-day standard deviation
+    - Recommend buffer = max(1.5 * 7-day-average, 3 * stddev, 7-day-average)
+    """
+    # Build date->income map
+    income_by_date = {}
+    for inc in user_data["income"]:
+        d = inc.get("date") or today_str()
+        income_by_date.setdefault(d, 0)
+        income_by_date[d] += inc.get("amount", 0)
+
+    today = datetime.date.today()
+    last14 = []
+    for i in range(13, -1, -1):
+        day = (today - datetime.timedelta(days=i)).isoformat()
+        amt = income_by_date.get(day, 0)
+        last14.append({"date": day, "income": amt})
+
+    # 7-day avg
+    last7_vals = [d["income"] for d in last14[-7:]]
+    seven_day_avg = sum(last7_vals) / 7 if any(last7_vals) else 0
+
+    # stddev over 14 days (population stddev)
+    vals = [d["income"] for d in last14]
+    stdev = statistics.pstdev(vals) if len(vals) > 0 else 0
+
+    # median fallback
+    median = statistics.median(vals) if len(vals) > 0 else 0
+
+    # recommended buffer now uses multiplier param and volatility
+    candidate1 = round(seven_day_avg * multiplier, 2)
+    candidate2 = round(stdev * 3, 2)
+    candidate3 = round(max(seven_day_avg, median), 2)
+    recommended_buffer = max(candidate1, candidate2, candidate3)
+
+    return {
+        "seven_day_avg": seven_day_avg,
+        "stddev_14": stdev,
+        "median_14": median,
+        "last14": last14,
+        "recommended_buffer": recommended_buffer,
+        "used_multiplier": multiplier,
+        "note": "Recommended buffer = max(multiplier*7d_avg, 3*stddev, max(7d_avg, median))"
+    }
+
+
+@app.get("/ai-nudge")
+def ai_nudge(lang: str = Query("en", description="Language code: en, hi, ta")):
+    """Generate a brief savings nudge in the requested language using Claude (Anthropic).
+
+    Requires ANTHROPIC_API_KEY in environment for production use. If missing, return a simple fallback translation.
+    """
+    total_income = sum(x["amount"] for x in user_data["income"])
+    total_expense = sum(x["total"] for x in user_data["expenses"])
+    remaining = total_income - total_expense
+
+    base_nudge = (
+        f"You spent ₹{total_expense}. Try to stay under ₹{round(remaining * 0.5)} today. Keep building your buffer."
+    )
+
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        # Simple language map fallback
+        translations = {
+            "en": base_nudge,
+            "hi": "आपने ₹{} खर्च किए। आज ₹{} के अंदर रहने की कोशिश करें। अपना बफर बनाते रहें।".format(total_expense, round(remaining * 0.5)),
+            "ta": "நீங்கள் ₹{} செலவழித்தீர்கள். இன்றைக்கு ₹{} க்குள் இருக்க முயற்சிக்கவும். உங்கள் காப்புறுதியை உருவாக்கத் தொடருங்கள்.".format(total_expense, round(remaining * 0.5))
+        }
+        return {"aiNudge": translations.get(lang, base_nudge), "source": "fallback"}
+
+    try:
+        client = anthropic.Client(api_key=api_key)
+        # Craft a short prompt asking for a concise nudge in the requested language
+        prompt = (
+            f"You are a helpful financial coach. Produce one short sentence (<= 25 words) in language '{lang}' giving a gentle spending nudge. "
+            f"Context: total_expense={total_expense}, remaining={remaining}. Output only the sentence."
+        )
+
+        resp = client.completions.create(
+            model="claude-2", prompt=prompt, max_tokens_to_sample=200
+        )
+
+        # resp may contain 'completion' field or similar
+        content = resp.get("completion") if isinstance(resp, dict) else getattr(resp, "completion", None)
+        if not content:
+            # try alternate attribute
+            content = str(resp)
+
+        return {"aiNudge": content.strip(), "source": "claude"}
+    except Exception as e:
+        return {"aiNudge": base_nudge, "source": "error", "error": str(e)}

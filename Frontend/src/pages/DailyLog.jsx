@@ -1,9 +1,11 @@
 import { useState } from "react";
 import API from "../api/api";
 import { useNavigate } from "react-router-dom";
+import { useI18n } from '../i18n'
 
 export default function DailyLog() {
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const [formData, setFormData] = useState({
     earned: "",
@@ -53,11 +55,11 @@ export default function DailyLog() {
       <div className="w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-8 shadow-xl">
 
         <h1 className="text-3xl font-bold text-white mb-2">
-          Daily Log
+          {t('dashboard')}
         </h1>
 
         <p className="text-gray-300 mb-6">
-          Track today's income and expenses.
+          {t('track_today')}
         </p>
 
         <div className="space-y-4">
@@ -65,7 +67,7 @@ export default function DailyLog() {
           <input
             type="number"
             name="earned"
-            placeholder="Earned Today (₹)"
+            placeholder={t('earned_today')}
             value={formData.earned}
             onChange={handleChange}
             className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white"
@@ -108,14 +110,14 @@ export default function DailyLog() {
           />
 
           <div className="bg-white/10 border border-white/20 rounded-xl p-3 text-white">
-            Total Expense Today: ₹{totalExpense}
+            {t('total_expense_today')}{totalExpense}
           </div>
 
           <button
             onClick={handleSubmit}
             className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 transition-all text-white font-semibold"
           >
-            Save Log
+            {t('save_log')}
           </button>
 
         </div>
