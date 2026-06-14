@@ -86,21 +86,37 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">{t('dashboard')}</h1>
+    <div className="max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{t('dashboard')}</h1>
+      </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-12 gap-8">
+        {/* Left Column - Summary & Engine */}
+        <div className="lg:col-span-7 space-y-8">
+          
           {/* Income Engine Panel */}
           {engine && (
-            <div className="bg-white/5 p-4 rounded-xl mb-4">
-              <h3 className="font-semibold">{t('income_engine')}</h3>
-              <p>{t('seven_day_avg')}: ₹{engine.seven_day_avg}</p>
-              <p>{t('daily_spend_limit')}: ₹{engine.daily_spend_limit}</p>
+            <div className="bg-white border border-slate-200/80 shadow-sm p-6 rounded-2xl">
+              <h3 className="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                <i className="ti ti-engine text-blue-600"></i> {t('income_engine')}
+              </h3>
+              <div className="grid sm:grid-cols-2 gap-4 text-slate-700">
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100/50">
+                  <div className="text-xs text-slate-400 font-medium mb-1">{t('seven_day_avg')}</div>
+                  <div className="text-xl font-bold text-slate-800">₹{engine.seven_day_avg}</div>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100/50">
+                  <div className="text-xs text-slate-400 font-medium mb-1">{t('daily_spend_limit')}</div>
+                  <div className="text-xl font-bold text-slate-800">₹{engine.daily_spend_limit}</div>
+                </div>
+              </div>
               {engine.bad_day_mode ? (
-                <div className="mt-2 p-3 bg-red-700/20 rounded">
-                  <strong>{t('bad_day_mode_active')}</strong>
-                  <ul className="mt-2 list-disc ml-5">
+                <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-xl">
+                  <strong className="text-red-700 font-bold flex items-center gap-2">
+                    <i className="ti ti-alert-triangle"></i> {t('bad_day_mode_active')}
+                  </strong>
+                  <ul className="mt-2 list-disc ml-5 text-red-600 text-sm space-y-1">
                     {engine.gov_schemes.map((s,i) => (
                       <li key={i}>{s.name}: {s.desc}</li>
                     ))}
@@ -109,97 +125,112 @@ export default function Dashboard() {
               ) : null}
             </div>
           )}
-          {/* Left Column - Summary Cards */}
-          <div className="space-y-6">
-            <div className="grid grid-cols-3 gap-4">
-              <Card title="Income" value={data.totalIncome} />
-              <Card title="Expense" value={data.totalExpense} />
-              <Card title="Remaining" value={data.remaining} />
-            </div>
 
-            <div className="bg-white/10 p-6 rounded-xl">
-              <h2>{t('spend_limit')}</h2>
-              <p className="text-4xl text-green-400">₹{data.spendLimit}</p>
-            </div>
+          {/* Key Stats Cards */}
+          <div className="grid grid-cols-3 gap-4">
+            <Card title="Income" value={data.totalIncome} />
+            <Card title="Expense" value={data.totalExpense} />
+            <Card title="Remaining" value={data.remaining} />
+          </div>
 
-            <div className="bg-white/10 p-6 rounded-xl">
-              <h2>{t('ai_insight')}</h2>
-              <p>{aiNudge || data.aiNudge}</p>
-              <div className="mt-2 flex items-center gap-2">
-                <label className="text-sm">Language:</label>
-                <select value={lang} onChange={async (e) => {
-                    const newLang = e.target.value;
-                    setLang(newLang);
-                    try {
-                      const a = await API.get('/ai-nudge', { params: { lang: newLang } });
-                      setAiNudge(a.data.aiNudge || '');
-                    } catch (err) {
-                      console.error('ai-nudge fetch failed', err);
-                    }
-                  }} className="bg-slate-800 text-white rounded px-2">
-                  <option value="en">English</option>
-                  <option value="hi">Hindi</option>
-                  <option value="ta">Tamil</option>
-                </select>
-              </div>
+          {/* Spend Limit */}
+          <div className="bg-white border border-slate-200/80 shadow-sm p-6 rounded-2xl flex justify-between items-center">
+            <div>
+              <h2 className="text-slate-500 font-medium text-sm mb-1">{t('spend_limit')}</h2>
+              <p className="text-4xl font-black text-emerald-600">₹{data.spendLimit}</p>
             </div>
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => navigate("/add-log")}
-                className="bg-green-500 px-4 py-2 rounded"
-              >
-                {t('add_log')}
-              </button>
-              <button
-                onClick={() => navigate("/savings-goal")}
-                className="bg-blue-500 px-4 py-2 rounded"
-              >
-                {t('savings_goal')}
-              </button>
-  
-              <button
-                onClick={() => navigate("/family-shield")}
-                className="bg-purple-500 px-4 py-2 rounded"
-              >
-                Family Shield
-              </button>
+            <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+              <i className="ti ti-wallet text-2xl"></i>
             </div>
           </div>
 
-          {/* Right Column - Smart Allocation */}
-          <div>
+          {/* AI Insight */}
+          <div className="bg-white border border-slate-200/80 shadow-sm p-6 rounded-2xl">
+            <h2 className="font-bold text-lg text-slate-900 mb-3 flex items-center gap-2">
+              <i className="ti ti-bulb text-amber-500"></i> {t('ai_insight')}
+            </h2>
+            <p className="text-slate-600 leading-relaxed font-medium">{aiNudge || data.aiNudge}</p>
+            <div className="mt-4 flex items-center gap-2 border-t border-slate-100 pt-3">
+              <label className="text-sm text-slate-500 font-semibold">Language / भाषा / மொழி:</label>
+              <select value={lang} onChange={async (e) => {
+                  const newLang = e.target.value;
+                  setLang(newLang);
+                  try {
+                    const a = await API.get('/ai-nudge', { params: { lang: newLang } });
+                    setAiNudge(a.data.aiNudge || '');
+                  } catch (err) {
+                    console.error('ai-nudge fetch failed', err);
+                  }
+                }} className="bg-slate-50 border border-slate-200 text-slate-700 rounded-lg px-3 py-1.5 text-xs font-bold focus:outline-none">
+                <option value="en">English</option>
+                <option value="hi">Hindi (हिंदी)</option>
+                <option value="ta">Tamil (தமிழ்)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-wrap gap-4 pt-2">
+            <button
+              onClick={() => navigate("/add-log")}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-sm cursor-pointer"
+            >
+              <i className="ti ti-plus text-lg"></i> {t('add_log')}
+            </button>
+            <button
+              onClick={() => navigate("/savings-goal")}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-sm cursor-pointer"
+            >
+              <i className="ti ti-target text-lg"></i> {t('savings_goal')}
+            </button>
+            <button
+              onClick={() => navigate("/family-shield")}
+              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-sm cursor-pointer"
+            >
+              <i className="ti ti-shield text-lg"></i> Family Shield
+            </button>
+          </div>
+        </div>
+
+        {/* Right Column - Allocations & Buffer */}
+        <div className="lg:col-span-5 space-y-8">
+          <div className="bg-white border border-slate-200/80 shadow-sm p-6 rounded-2xl">
             <SmartAllocation onAllocationComplete={handleAllocationComplete} />
-            {buffer && (
-              <div className="mt-4 bg-white/5 p-4 rounded-xl">
-                <h3 className="font-semibold">{t('emergency_buffer')}</h3>
-                <p>{t('recommended_buffer')}: ₹{buffer.recommended_buffer}</p>
-                <p className="text-sm text-slate-400">{buffer.note}</p>
-
-                <div className="mt-3">
-                  <label className="text-sm">{t('multiplier')}: {bufferMultiplier}</label>
-                  <input type="range" min="0.5" max="3" step="0.1" value={bufferMultiplier} onChange={(e)=>setBufferMultiplier(Number(e.target.value))} className="w-full mt-1" />
-                  <div className="flex justify-end mt-2">
-                    <button className="bg-green-500 px-3 py-1 rounded" onClick={async ()=>{ const b = await API.get('/emergency-buffer',{params:{multiplier:bufferMultiplier}}); setBuffer(b.data); }}>{t('apply')}</button>
-                  </div>
-                </div>
-
-                {/* Improved SVG bar chart with tooltips & historical view */}
-                {buffer.last14 && (
-                  <div className="mt-4">
-                    <div className="flex justify-between items-center">
-                      <div className="text-sm mb-2">{t('income_last14')}</div>
-                      <div>
-                        <button onClick={() => setShowHistory(prev=>!prev)} className="text-xs bg-slate-700 px-2 py-1 rounded">{showHistory ? 'Hide' : 'Show'} history</button>
-                      </div>
-                    </div>
-                    <SVGChart data={buffer.last14} height={120} />
-                    <div className="mt-2 text-xs text-slate-400">{t('hover_bars')}</div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
+          
+          {buffer && (
+            <div className="bg-white border border-slate-200/80 shadow-sm p-6 rounded-2xl">
+              <h3 className="font-bold text-lg text-slate-900 mb-3 flex items-center gap-2">
+                <i className="ti ti-shield-alert text-blue-600"></i> {t('emergency_buffer')}
+              </h3>
+              <p className="text-slate-800 font-semibold">{t('recommended_buffer')}: <span className="text-blue-600 font-bold">₹{buffer.recommended_buffer}</span></p>
+              <p className="text-sm text-slate-500 mt-1 mb-4 leading-relaxed">{buffer.note}</p>
+
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100/80">
+                <label className="text-sm text-slate-600 font-semibold">{t('multiplier')}: <span className="font-bold text-slate-850">{bufferMultiplier}x</span></label>
+                <input type="range" min="0.5" max="3" step="0.1" value={bufferMultiplier} onChange={(e)=>setBufferMultiplier(Number(e.target.value))} className="w-full mt-2 accent-blue-600 cursor-pointer" />
+                <div className="flex justify-end mt-3">
+                  <button className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition cursor-pointer" onClick={async ()=>{ const b = await API.get('/emergency-buffer',{params:{multiplier:bufferMultiplier}}); setBuffer(b.data); }}>{t('apply')}</button>
+                </div>
+              </div>
+
+              {/* Chart with Tooltips */}
+              {buffer.last14 && (
+                <div className="mt-6 border-t border-slate-100 pt-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('income_last14')}</div>
+                    <div>
+                      <button onClick={() => setShowHistory(prev=>!prev)} className="text-xs bg-slate-100 hover:bg-slate-250 text-slate-600 hover:text-slate-850 px-2 py-1.5 rounded-lg transition font-bold border border-slate-200/60">{showHistory ? 'Hide' : 'Show'} history</button>
+                    </div>
+                  </div>
+                  <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100/50 flex justify-center">
+                    <SVGChart data={buffer.last14} height={120} />
+                  </div>
+                  <div className="mt-2 text-xs text-slate-400">{t('hover_bars')}</div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -208,9 +239,9 @@ export default function Dashboard() {
 
 function Card({ title, value }) {
   return (
-    <div className="bg-white/10 p-4 rounded-xl">
-      <h3 className="text-gray-300">{title}</h3>
-      <p className="text-xl font-bold">₹{value}</p>
+    <div className="bg-white border border-slate-200/80 shadow-sm p-5 rounded-2xl flex flex-col justify-between">
+      <h3 className="text-slate-400 font-semibold text-xs mb-2 uppercase tracking-wider">{title}</h3>
+      <p className="text-2xl font-black text-slate-850">₹{value}</p>
     </div>
   );
 }

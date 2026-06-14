@@ -122,150 +122,154 @@ export default function SavingsGoal() {
   const progress = targetAmount > 0 ? (savedSoFar / Number(targetAmount)) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8">Savings Goal Planner</h1>
+    <div className="max-w-2xl mx-auto py-8">
+      <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-6 flex items-center gap-3">
+        <i className="ti ti-target text-blue-600 text-3xl"></i> Savings Goal Planner
+      </h1>
 
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 space-y-6">
-          
-          {/* Goal Name - Editable */}
-          <div>
-            <label className="block mb-2 font-semibold">Goal Name</label>
-            <input
-              value={goalName}
-              onChange={(e) => setGoalName(e.target.value)}
-              className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-green-500 focus:outline-none"
-              placeholder="e.g., New Bicycle, Vacation, Emergency Fund"
+      <div className="bg-white border border-slate-200/80 shadow-sm rounded-3xl p-8 space-y-6">
+        
+        {/* Goal Name - Editable */}
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">Goal Name</label>
+          <input
+            value={goalName}
+            onChange={(e) => setGoalName(e.target.value)}
+            className="w-full p-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
+            placeholder="e.g., New Bicycle, Vacation, Emergency Fund"
+          />
+        </div>
+
+        {/* Target Amount - Editable */}
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">Target Amount (₹)</label>
+          <input
+            type="number"
+            value={targetAmount}
+            onChange={(e) => handleTargetChange(e.target.value)}
+            className="w-full p-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-850 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
+            placeholder="e.g., 50000"
+          />
+        </div>
+
+        {/* Current Progress Display */}
+        <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6">
+          <div className="flex justify-between items-center mb-3">
+            <span className="font-bold text-slate-750 text-sm uppercase tracking-wider">Current Progress</span>
+            <span className="font-bold text-slate-850">₹{savedSoFar} / ₹{targetAmount || 0}</span>
+          </div>
+          <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
+            <div
+              className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+              style={{ width: `${progress}%` }}
             />
           </div>
+          <div className="flex justify-between items-center mt-3 text-sm font-semibold text-slate-650">
+            <span>{progress.toFixed(0)}% Complete</span>
+            <span>Remaining: ₹{remaining}</span>
+          </div>
+        </div>
 
-          {/* Target Amount - Editable */}
+        {/* Interactive Savings Calculator */}
+        <div className="bg-slate-50 border border-slate-200/65 rounded-2xl p-6 space-y-4">
+          <h3 className="text-base font-bold text-slate-850 flex items-center gap-2">
+            🎯 Plan Your Savings
+          </h3>
+
+          {/* Saving Per Day - Editable */}
           <div>
-            <label className="block mb-2 font-semibold">Target Amount (₹)</label>
+            <label className="block mb-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Savings Amount Per Day (₹)
+            </label>
             <input
               type="number"
-              value={targetAmount}
-              onChange={(e) => handleTargetChange(e.target.value)}
-              className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-green-500 focus:outline-none"
-              placeholder="e.g., 50000"
+              value={savingPerDay}
+              onChange={(e) => handleSavingPerDayChange(e.target.value)}
+              className="w-full p-3 rounded-lg bg-white border border-slate-200 text-slate-850 font-semibold focus:border-blue-500 focus:outline-none transition"
+              placeholder="e.g., 500"
             />
-          </div>
-
-          {/* Current Progress Display */}
-          <div className="bg-green-900/30 border border-green-700 rounded-xl p-4">
-            <div className="flex justify-between mb-2">
-              <span className="font-semibold">Current Progress</span>
-              <span>₹{savedSoFar} / ₹{targetAmount || 0}</span>
-            </div>
-            <div className="w-full h-4 bg-slate-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-green-500 transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <p className="mt-2 text-sm text-slate-300">
-              {progress.toFixed(0)}% Complete
-            </p>
-            <p className="mt-1 text-sm text-slate-300">
-              Remaining: ₹{remaining}
+            <p className="text-xs text-slate-400 mt-1.5 font-medium">
+              How much you can save each day
             </p>
           </div>
 
-          {/* Interactive Savings Calculator */}
-          <div className="bg-slate-800/50 rounded-xl p-4 space-y-4">
-            <h3 className="text-lg font-semibold text-green-400">
-              🎯 Plan Your Savings
-            </h3>
-
-            {/* Saving Per Day - Editable */}
-            <div>
-              <label className="block mb-2 text-sm text-slate-300">
-                Savings Amount Per Day (₹)
-              </label>
-              <input
-                type="number"
-                value={savingPerDay}
-                onChange={(e) => handleSavingPerDayChange(e.target.value)}
-                className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-green-500 focus:outline-none"
-                placeholder="e.g., 500"
-              />
-              <p className="text-xs text-slate-400 mt-1">
-                How much you can save each day
-              </p>
-            </div>
-
-            {/* Number of Days - Editable */}
-            <div>
-              <label className="block mb-2 text-sm text-slate-300">
-                Number of Days
-              </label>
-              <input
-                type="number"
-                value={numberOfDays}
-                onChange={(e) => handleDaysChange(e.target.value)}
-                className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-green-500 focus:outline-none"
-                placeholder="e.g., 30"
-              />
-              <p className="text-xs text-slate-400 mt-1">
-                Days needed to reach your goal
-              </p>
-            </div>
-
-            {/* Quick Calculation Display */}
-            {savingPerDay && numberOfDays && (
-              <div className="bg-slate-900 rounded-lg p-3 mt-2">
-                <p className="text-sm text-slate-300">
-                  Total savings in {numberOfDays} days:
-                </p>
-                <p className="text-xl font-bold text-green-400">
-                  ₹{Number(savingPerDay) * Number(numberOfDays)}
-                </p>
-                {Number(savingPerDay) * Number(numberOfDays) > remaining && (
-                  <p className="text-xs text-green-400 mt-1">
-                    ✓ You'll reach your goal early!
-                  </p>
-                )}
-                {Number(savingPerDay) * Number(numberOfDays) < remaining && (
-                  <p className="text-xs text-orange-400 mt-1">
-                    ⚠ You'll need more days to reach your goal
-                  </p>
-                )}
-              </div>
-            )}
+          {/* Number of Days - Editable */}
+          <div>
+            <label className="block mb-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Number of Days
+            </label>
+            <input
+              type="number"
+              value={numberOfDays}
+              onChange={(e) => handleDaysChange(e.target.value)}
+              className="w-full p-3 rounded-lg bg-white border border-slate-200 text-slate-850 font-semibold focus:border-blue-500 focus:outline-none transition"
+              placeholder="e.g., 30"
+            />
+            <p className="text-xs text-slate-400 mt-1.5 font-medium">
+              Days needed to reach your goal
+            </p>
           </div>
 
-          {/* Action Buttons */}
-          <div className="space-y-3">
-            {!isEditing ? (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 transition font-semibold"
-              >
-                Plan Savings Strategy
-              </button>
-            ) : (
-              <button
-                onClick={handleUpdateSavings}
-                className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 transition font-semibold"
-              >
-                Apply Savings Plan
-              </button>
-            )}
+          {/* Quick Calculation Display */}
+          {savingPerDay && numberOfDays && (
+            <div className="bg-white border border-slate-200/50 rounded-xl p-4 mt-3">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                Total savings in {numberOfDays} days:
+              </p>
+              <p className="text-2xl font-black text-blue-650 mt-1">
+                ₹{Number(savingPerDay) * Number(numberOfDays)}
+              </p>
+              {Number(savingPerDay) * Number(numberOfDays) >= remaining && (
+                <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1">
+                  ✓ You'll reach your goal early!
+                </p>
+              )}
+              {Number(savingPerDay) * Number(numberOfDays) < remaining && (
+                <p className="text-xs text-amber-600 font-bold mt-2 flex items-center gap-1">
+                  ⚠ You'll need more days to reach your goal
+                </p>
+              )}
+            </div>
+          )}
+        </div>
 
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+          <button
+            onClick={() => navigate("/")}
+            className="py-3 rounded-xl border border-slate-200 text-slate-500 font-bold hover:bg-slate-50 transition cursor-pointer"
+          >
+            Cancel
+          </button>
+          {!isEditing ? (
             <button
-              onClick={handleSubmit}
-              className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 transition font-semibold"
+              onClick={() => setIsEditing(true)}
+              className="py-3 rounded-xl bg-blue-650 hover:bg-blue-700 text-white transition font-bold shadow-sm cursor-pointer"
             >
-              Save Goal
+              Plan Savings Strategy
             </button>
-          </div>
+          ) : (
+            <button
+              onClick={handleUpdateSavings}
+              className="py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition font-bold shadow-sm cursor-pointer"
+            >
+              Apply Savings Plan
+            </button>
+          )}
+        </div>
 
-          {/* Help Text */}
-          <div className="text-sm text-slate-400 text-center border-t border-slate-700 pt-4">
-            <p>💡 Tip: Edit any field - the others will auto-update!</p>
-            <p className="mt-1">Set your daily savings OR target days to calculate the other.</p>
-          </div>
+        {/* Save Goal Button */}
+        <button
+          onClick={handleSubmit}
+          className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition text-white font-bold shadow-sm cursor-pointer mt-4"
+        >
+          Save Goal
+        </button>
 
+        {/* Help Text */}
+        <div className="text-xs text-slate-400 text-center border-t border-slate-100 pt-4 font-medium leading-relaxed">
+          <p>💡 Tip: Edit any field - the others will auto-update!</p>
+          <p className="mt-1">Set your daily savings OR target days to calculate the other.</p>
         </div>
       </div>
     </div>

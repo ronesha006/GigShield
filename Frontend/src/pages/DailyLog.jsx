@@ -51,75 +51,95 @@ export default function DailyLog() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-8 shadow-xl">
-
-        <h1 className="text-3xl font-bold text-white mb-2">
-          {t('dashboard')}
+    <div className="max-w-md mx-auto py-8">
+      <div className="bg-white border border-slate-200/80 shadow-sm rounded-3xl p-8">
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
+          Daily Activity Log
         </h1>
-
-        <p className="text-gray-300 mb-6">
+        <p className="text-slate-500 font-medium mb-6">
           {t('track_today')}
         </p>
 
         <div className="space-y-4">
-
-          <input
-            type="number"
-            name="earned"
-            placeholder={t('earned_today')}
-            value={formData.earned}
-            onChange={handleChange}
-            className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white"
-          />
-
-          <input
-            type="number"
-            name="food"
-            placeholder="Food Expense (₹)"
-            value={formData.food}
-            onChange={handleChange}
-            className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white"
-          />
-
-          <input
-            type="number"
-            name="transport"
-            placeholder="Transport Expense (₹)"
-            value={formData.transport}
-            onChange={handleChange}
-            className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white"
-          />
-
-          <input
-            type="number"
-            name="medical"
-            placeholder="Medical Expense (₹)"
-            value={formData.medical}
-            onChange={handleChange}
-            className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white"
-          />
-
-          <input
-            type="number"
-            name="other"
-            placeholder="Other Expense (₹)"
-            value={formData.other}
-            onChange={handleChange}
-            className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white"
-          />
-
-          <div className="bg-white/10 border border-white/20 rounded-xl p-3 text-white">
-            {t('total_expense_today')}{totalExpense}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t('earned_today')}</label>
+            <input
+              type="number"
+              name="earned"
+              placeholder="e.g. 500"
+              value={formData.earned}
+              onChange={handleChange}
+              className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
+            />
           </div>
 
-          <button
-            onClick={handleSubmit}
-            className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 transition-all text-white font-semibold"
-          >
-            {t('save_log')}
-          </button>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Food Expense (₹)</label>
+            <input
+              type="number"
+              name="food"
+              placeholder="e.g. 150"
+              value={formData.food}
+              onChange={handleChange}
+              className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
+            />
+          </div>
 
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Transport Expense (₹)</label>
+            <input
+              type="number"
+              name="transport"
+              placeholder="e.g. 100"
+              value={formData.transport}
+              onChange={handleChange}
+              className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Medical Expense (₹)</label>
+            <input
+              type="number"
+              name="medical"
+              placeholder="e.g. 200"
+              value={formData.medical}
+              onChange={handleChange}
+              className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Other Expense (₹)</label>
+            <input
+              type="number"
+              name="other"
+              placeholder="e.g. 50"
+              value={formData.other}
+              onChange={handleChange}
+              className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
+            />
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 text-slate-705 font-bold flex justify-between items-center mt-6">
+            <span>{t('total_expense_today')}</span>
+            <span className="text-red-600 text-lg">₹{totalExpense}</span>
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <button
+              onClick={() => navigate("/")}
+              className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold hover:bg-slate-50 transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition-all text-white font-bold shadow-sm cursor-pointer"
+            >
+              {t('save_log')}
+            </button>
+          </div>
         </div>
       </div>
     </div>
