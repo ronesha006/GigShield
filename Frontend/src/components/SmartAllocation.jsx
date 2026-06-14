@@ -61,9 +61,10 @@ export default function SmartAllocation({ onAllocationComplete }) {
   const handleAllocate = async () => {
     let amountToAllocate;
     
+    // FIXED: Correctly calculate amount for both modes
     if (allocationMode === "percentage") {
       const availableToAllocate = savingsData?.available_savings || netSavings;
-      const amount = (availableToAllocate * allocationPercent) / 100;
+      amountToAllocate = (availableToAllocate * allocationPercent) / 100;
     } else {
       amountToAllocate = parseFloat(customAmount);
     }
@@ -221,20 +222,20 @@ export default function SmartAllocation({ onAllocationComplete }) {
           ₹{currentAllocation.toLocaleString()}
         </p>
         <p className="text-sm text-slate-400">
-          {((currentAllocation / netSavings) * 100).toFixed(1)}% of net savings
+          {((currentAllocation / availableToAllocate) * 100).toFixed(1)}% of available savings
         </p>
         
-        {/* Warning Indicator */}
-          {currentAllocation > maxRecommended && (
+        {/* Warning Indicator - FIXED to show proper message */}
+        {currentAllocation > maxRecommended && (
           <div className="mt-2 text-red-400 text-sm flex items-center gap-2">
-            {t('bad_day_message')}
+            ⚠️ This exceeds the recommended 50% limit
           </div>
         )}
         
         {/* Recommendation */}
         <div className="mt-3 pt-3 border-t border-slate-700">
            <p className="text-sm text-green-400">
-             {t('recommended_buffer')}: ₹{recommendedAmount.toLocaleString()} (50%)
+             💡 Recommended: Save ₹{maxRecommended.toLocaleString()} (50% of available)
            </p>
         </div>
       </div>
@@ -266,6 +267,7 @@ export default function SmartAllocation({ onAllocationComplete }) {
       {showWarning && warningData && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-slate-800 rounded-2xl p-6 max-w-md w-full border-2 border-red-500">
+            <div className="text-red-400 text-5xl mb-4 text-center">⚠️</div>
             <h3 className="text-xl font-bold text-white mb-4 text-center">
               High Savings Alert!
             </h3>
@@ -273,12 +275,15 @@ export default function SmartAllocation({ onAllocationComplete }) {
               {warningData.message}
             </p>
             <div className="bg-slate-900 p-3 rounded-lg mb-4">
-              <p> Details:</p>
-              <p>Net Savings: ₹{warningData.net_savings}</p>
-              <p>Requested: ₹{warningData.requested_amount}</p>
-              <p>Recommended Max: ₹{warningData.recommended_max}</p>
-              <p>Exceeds by: ₹{warningData.exceeds_by}</p>
+              <p className="font-semibold mb-2">📊 Details:</p>
+              <p>Available Savings: ₹{warningData.available_savings?.toLocaleString() || warningData.net_savings?.toLocaleString()}</p>
+              <p>Requested: ₹{warningData.requested_amount?.toLocaleString()}</p>
+              <p>Recommended Max: ₹{warningData.recommended_max?.toLocaleString()} (50%)</p>
+              <p>Exceeds by: ₹{warningData.exceeds_by?.toLocaleString()}</p>
             </div>
+            <p className="text-yellow-400 text-sm mb-4">
+              Saving more than 50% might leave you short for unexpected expenses.
+            </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowWarning(false)}
@@ -305,7 +310,7 @@ export default function SmartAllocation({ onAllocationComplete }) {
             <div key={goal.id} className="mb-3">
               <div className="flex justify-between text-sm">
                 <span>{goal.name}</span>
-                <span>₹{goal.saved} / ₹{goal.target}</span>
+                <span>₹{goal.saved.toLocaleString()} / ₹{goal.target.toLocaleString()}</span>
               </div>
               <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden mt-1">
                 <div
