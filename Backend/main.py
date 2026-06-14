@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+import datetime
 import statistics
 from fastapi import Query
 
@@ -313,7 +313,7 @@ def allocate_savings(data: AllocateSavingsRequest):
     
     user_data["allocated_savings"] += data.amount
     _recalculate_available_savings()
-    user_data["savings_allocation"]["last_allocation_date"] = datetime.now().isoformat()
+    user_data["savings_allocation"]["last_allocation_date"] = datetime.datetime.now().isoformat()
     
     return {
         "message": f"Successfully allocated ₹{data.amount} to your goals",
