@@ -146,7 +146,7 @@ export default function SmartAllocation({ onAllocationComplete }) {
           Income: ₹{savingsData.total_income} · Expenses: ₹{savingsData.total_expense}
         </p>
         {savingsData.allocated_savings > 0 && (
-          <p className="text-xs text-blue-650 font-bold mt-1.5 flex items-center gap-1">
+          <p className="text-xs text-blue-600 font-bold mt-1.5 flex items-center gap-1">
             Already allocated to goals: ₹{savingsData.allocated_savings.toLocaleString()}
           </p>
         )}
@@ -228,7 +228,7 @@ export default function SmartAllocation({ onAllocationComplete }) {
               <p>Available Savings: <span className="font-bold text-slate-900">₹{warningData.available_savings?.toLocaleString() || warningData.net_savings?.toLocaleString()}</span></p>
               <p>Requested: <span className="font-bold text-slate-900">₹{warningData.requested_amount?.toLocaleString()}</span></p>
               <p>Recommended Max: <span className="font-bold text-slate-900">₹{warningData.recommended_max?.toLocaleString()} (50%)</span></p>
-              <p>Exceeds by: <span className="font-bold text-red-650">₹{warningData.exceeds_by?.toLocaleString()}</span></p>
+              <p>Exceeds by: <span className="font-bold text-red-600">₹{warningData.exceeds_by?.toLocaleString()}</span></p>
             </div>
             <p className="text-amber-600 text-xs font-bold mb-6">
               Saving more than 50% might leave you short for unexpected expenses.

@@ -207,7 +207,7 @@ export default function Dashboard() {
               <p className="text-sm text-slate-500 mt-1 mb-4 leading-relaxed">{buffer.note}</p>
 
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-100/80">
-                <label className="text-sm text-slate-600 font-semibold">{t('multiplier')}: <span className="font-bold text-slate-850">{bufferMultiplier}x</span></label>
+                <label className="text-sm text-slate-600 font-semibold">{t('multiplier')}: <span className="font-bold text-slate-800">{bufferMultiplier}x</span></label>
                 <input type="range" min="0.5" max="3" step="0.1" value={bufferMultiplier} onChange={(e)=>setBufferMultiplier(Number(e.target.value))} className="w-full mt-2 accent-blue-600 cursor-pointer" />
                 <div className="flex justify-end mt-3">
                   <button className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition cursor-pointer" onClick={async ()=>{ const b = await API.get('/emergency-buffer',{params:{multiplier:bufferMultiplier}}); setBuffer(b.data); }}>{t('apply')}</button>
@@ -220,7 +220,7 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center mb-3">
                     <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('income_last14')}</div>
                     <div>
-                      <button onClick={() => setShowHistory(prev=>!prev)} className="text-xs bg-slate-100 hover:bg-slate-250 text-slate-600 hover:text-slate-850 px-2 py-1.5 rounded-lg transition font-bold border border-slate-200/60">{showHistory ? 'Hide' : 'Show'} history</button>
+                      <button onClick={() => setShowHistory(prev=>!prev)} className="text-xs bg-slate-100 hover:bg-slate-250 text-slate-600 hover:text-slate-800 px-2 py-1.5 rounded-lg transition font-bold border border-slate-200/60">{showHistory ? 'Hide' : 'Show'} history</button>
                     </div>
                   </div>
                   <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100/50 flex justify-center">
@@ -241,7 +241,7 @@ function Card({ title, value }) {
   return (
     <div className="bg-white border border-slate-200/80 shadow-sm p-5 rounded-2xl flex flex-col justify-between">
       <h3 className="text-slate-400 font-semibold text-xs mb-2 uppercase tracking-wider">{title}</h3>
-      <p className="text-2xl font-black text-slate-850">₹{value}</p>
+      <p className="text-2xl font-black text-slate-800">₹{value}</p>
     </div>
   );
 }

@@ -147,7 +147,7 @@ export default function SavingsGoal() {
             type="number"
             value={targetAmount}
             onChange={(e) => handleTargetChange(e.target.value)}
-            className="w-full p-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-850 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
+            className="w-full p-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
             placeholder="e.g., 50000"
           />
         </div>
@@ -156,7 +156,7 @@ export default function SavingsGoal() {
         <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6">
           <div className="flex justify-between items-center mb-3">
             <span className="font-bold text-slate-750 text-sm uppercase tracking-wider">Current Progress</span>
-            <span className="font-bold text-slate-850">₹{savedSoFar} / ₹{targetAmount || 0}</span>
+            <span className="font-bold text-slate-800">₹{savedSoFar} / ₹{targetAmount || 0}</span>
           </div>
           <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
             <div
@@ -164,7 +164,7 @@ export default function SavingsGoal() {
               style={{ width: `${progress}%` }}
             />
           </div>
-          <div className="flex justify-between items-center mt-3 text-sm font-semibold text-slate-650">
+          <div className="flex justify-between items-center mt-3 text-sm font-semibold text-slate-600">
             <span>{progress.toFixed(0)}% Complete</span>
             <span>Remaining: ₹{remaining}</span>
           </div>
@@ -172,7 +172,7 @@ export default function SavingsGoal() {
 
         {/* Interactive Savings Calculator */}
         <div className="bg-slate-50 border border-slate-200/65 rounded-2xl p-6 space-y-4">
-          <h3 className="text-base font-bold text-slate-850 flex items-center gap-2">
+          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
             🎯 Plan Your Savings
           </h3>
 
@@ -185,7 +185,7 @@ export default function SavingsGoal() {
               type="number"
               value={savingPerDay}
               onChange={(e) => handleSavingPerDayChange(e.target.value)}
-              className="w-full p-3 rounded-lg bg-white border border-slate-200 text-slate-850 font-semibold focus:border-blue-500 focus:outline-none transition"
+              className="w-full p-3 rounded-lg bg-white border border-slate-200 text-slate-800 font-semibold focus:border-blue-500 focus:outline-none transition"
               placeholder="e.g., 500"
             />
             <p className="text-xs text-slate-400 mt-1.5 font-medium">
@@ -202,7 +202,7 @@ export default function SavingsGoal() {
               type="number"
               value={numberOfDays}
               onChange={(e) => handleDaysChange(e.target.value)}
-              className="w-full p-3 rounded-lg bg-white border border-slate-200 text-slate-850 font-semibold focus:border-blue-500 focus:outline-none transition"
+              className="w-full p-3 rounded-lg bg-white border border-slate-200 text-slate-800 font-semibold focus:border-blue-500 focus:outline-none transition"
               placeholder="e.g., 30"
             />
             <p className="text-xs text-slate-400 mt-1.5 font-medium">
@@ -216,7 +216,7 @@ export default function SavingsGoal() {
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Total savings in {numberOfDays} days:
               </p>
-              <p className="text-2xl font-black text-blue-650 mt-1">
+              <p className="text-2xl font-black text-blue-600 mt-1">
                 ₹{Number(savingPerDay) * Number(numberOfDays)}
               </p>
               {Number(savingPerDay) * Number(numberOfDays) >= remaining && (
@@ -244,7 +244,7 @@ export default function SavingsGoal() {
           {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
-              className="py-3 rounded-xl bg-blue-650 hover:bg-blue-700 text-white transition font-bold shadow-sm cursor-pointer"
+              className="py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition font-bold shadow-sm cursor-pointer"
             >
               Plan Savings Strategy
             </button>
