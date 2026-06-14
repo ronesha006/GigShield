@@ -246,7 +246,6 @@ def set_savings_percentage(data: SavingsAllocation):
         "percentage": data.percentage
     }
 
-
 @app.post("/allocate-savings")
 def allocate_savings(data: AllocateSavingsRequest):
     """Allocate a specific amount to goals from net savings"""
@@ -258,31 +257,34 @@ def allocate_savings(data: AllocateSavingsRequest):
     total_expense = sum(x["total"] for x in user_data["expenses"])
     net_savings = total_income - total_expense
     
-    if net_savings <= 0:
+    # USE AVAILABLE SAVINGS INSTEAD OF NET SAVINGS
+    available_to_allocate = user_data["available_savings"]
+    
+    if available_to_allocate <= 0:
         return {
-            "error": "No net savings available to allocate",
-            "net_savings": 0,
+            "error": "No available savings to allocate",
+            "available_savings": 0,
             "can_allocate": False
         }
     
-    # Check if allocation exceeds 50% of net savings
-    fifty_percent = net_savings * 0.5
-    warning = None
+    # Check if allocation exceeds 50% of AVAILABLE savings
+    fifty_percent = available_to_allocate * 0.5
     
     if data.amount > fifty_percent and not data.force_override:
         return {
-            "message": f"Warning: Allocating ₹{data.amount} is {((data.amount/net_savings)*100):.1f}% of your net savings. This exceeds the recommended 50% limit.",
+            "warning": True,  # ADD THIS FLAG
+            "message": f"Warning: Allocating ₹{data.amount} is {((data.amount/available_to_allocate)*100):.1f}% of your available savings. This exceeds the recommended 50% limit.",
             "recommended_max": fifty_percent,
-            "net_savings": net_savings,
+            "available_savings": available_to_allocate,
             "requested_amount": data.amount,
             "exceeds_by": data.amount - fifty_percent
         }
     
-    # Check if user has enough net savings
-    if data.amount > net_savings:
+    # Check if user has enough available savings
+    if data.amount > available_to_allocate:
         return {
-            "error": f"Insufficient net savings. You only have ₹{net_savings} available.",
-            "net_savings": net_savings,
+            "error": f"Insufficient savings. You only have ₹{available_to_allocate} available.",
+            "available_savings": available_to_allocate,
             "requested_amount": data.amount
         }
     
@@ -311,6 +313,7 @@ def allocate_savings(data: AllocateSavingsRequest):
                 remaining = 0
                 break
     
+    # Update allocated savings and recalculate
     user_data["allocated_savings"] += data.amount
     _recalculate_available_savings()
     user_data["savings_allocation"]["last_allocation_date"] = datetime.datetime.now().isoformat()
@@ -318,13 +321,14 @@ def allocate_savings(data: AllocateSavingsRequest):
     return {
         "message": f"Successfully allocated ₹{data.amount} to your goals",
         "allocated_amount": data.amount,
-        "percentage_of_net": (data.amount / net_savings) * 100,
-        "net_savings": net_savings,
+        "percentage_of_available": (data.amount / available_to_allocate) * 100,
+        "available_savings_before": available_to_allocate,
+        "available_savings_after": user_data["available_savings"],
+        "allocated_savings": user_data["allocated_savings"],
         "allocated_to": allocated_to,
-        "remaining_net": net_savings - data.amount,
         "goals": user_data["goals"]
     }
-    
+
 @app.get("/savings-overview")
 def savings_overview():
     """Get overview of net savings and allocation recommendations"""
@@ -343,6 +347,7 @@ def savings_overview():
         "total_income": total_income,
         "total_expense": total_expense,
         "net_savings": net_savings,
+        "available_savings": user_data["available_savings"],
         "recommendations": {
             "conservative": conservative_save,
             "recommended": recommended_save,
