@@ -17,8 +17,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://gig-shield-ecru.vercel.app", "http://localhost:5173"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 user_data = {
@@ -26,9 +27,11 @@ user_data = {
     "expenses": [],
     "goals": [],
     "savings_allocation": {
-        "percentage": 30,  # Default 30% of net savings
+        "percentage": 30,
         "last_allocation_date": None
-    }
+    },
+    "available_savings": 0,
+    "allocated_savings": 0
 }
 
 
@@ -53,6 +56,12 @@ class ExpenseLog(BaseModel):
     medical: float
     other: float
 
+def _recalculate_available_savings():
+    total_income = sum(x["amount"] for x in user_data["income"])
+    total_expense = sum(x["total"] for x in user_data["expenses"])
+    net_savings = total_income - total_expense
+
+    user_data["available_savings"] = max(0, net_savings - user_data["allocated_savings"])
 
 @app.post("/log-income")
 def log_income(data: IncomeLog):
@@ -62,6 +71,8 @@ def log_income(data: IncomeLog):
 
     # After logging income, recompute bad day mode flag
     compute_bad_day_mode()
+
+    _recalculate_available_savings()
 
     return {
         "message": "Income logged successfully",
@@ -82,6 +93,8 @@ def log_expense(data: ExpenseLog):
     }
 
     user_data["expenses"].append(expense_entry)
+
+    _recalculate_available_savings()
 
     return {
         "message": "Expense logged successfully",
@@ -189,7 +202,7 @@ class SavingsAllocation(BaseModel):
 
 class AllocateSavingsRequest(BaseModel):
     amount: float
-    force_override: bool = False  # If user ignores warning
+    force_override: bool = False
 
 
 @app.post("/set-savings-percentage")

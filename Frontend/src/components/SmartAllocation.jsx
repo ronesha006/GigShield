@@ -128,10 +128,17 @@ export default function SmartAllocation({ onAllocationComplete }) {
       {/* Net Savings Display */}
       <div className="bg-green-900/30 border border-green-700 rounded-xl p-4">
         <p className="text-slate-300">{t('todays_net')}</p>
-        <p className="text-3xl font-bold text-green-400">₹{netSavings.toLocaleString()}</p>
+        <p className="text-3xl font-bold text-green-400">
+          ₹{(savingsData.available_savings ?? netSavings).toLocaleString()}
+        </p>
         <p className="text-sm text-slate-400">
           Income: ₹{savingsData.total_income} - Expenses: ₹{savingsData.total_expense}
         </p>
+        {savingsData.allocated_savings > 0 && (
+          <p className="text-xs text-blue-400 mt-1">
+            Already allocated to goals: ₹{savingsData.allocated_savings.toLocaleString()}
+          </p>
+        )}
       </div>
 
       {/* Mode Selection */}
