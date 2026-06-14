@@ -39,25 +39,23 @@ class ExpenseLog(BaseModel):
 	medical: float
 	other: float
 
-income_logs = []
-expense_logs = []
 
 @app.post("/log-income")
 def log_income(data: IncomeLog):
-	income_logs.append({
+	user_data["income"].append({
 		"amount": data.amount
 	})
 
 	return {
 		"message": "Income logged successfully",
-		"data": income_logs
+		"data": user_data["income"]
 	}
 
 @app.post("/log-expense")
 def log_expense(data: ExpenseLog):
     total = (data.food + data.transport + data.medical + data.other)
 	
-    expense_logs.append({
+    user_data["expense"].append({
 		"food": data.food,
 		"transport": data.transport,
 		"medical": data.medical,
@@ -67,7 +65,7 @@ def log_expense(data: ExpenseLog):
 	
     return {
 		"message": "Expense logged successfully",
-		"data": expense_logs
+		"data": user_data["expense"]
 	}
 
 

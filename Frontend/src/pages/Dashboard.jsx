@@ -5,6 +5,24 @@ import { useNavigate } from "react-router-dom";
 export default function Dashboard() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [refresh, setRefresh] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await API.get("/dashboard");
+        setData(res.data);
+      } catch (err) {
+        console.error("Error fetching dashboard:", err);
+      }
+    };
+
+    fetchData();
+  }, [refresh]);
+
+  const refreshDashboard = () => {
+    setRefresh(prev => !prev);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
