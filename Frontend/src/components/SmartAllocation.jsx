@@ -4,13 +4,13 @@ import { useI18n } from '../i18n'
 
 export default function SmartAllocation({ onAllocationComplete }) {
   const { t } = useI18n();
-  const [allocationPercent, setAllocationPercent] = useState(30);
+  // const [allocationPercent, setAllocationPercent] = useState(30); // COMMENTED OUT - Percentage mode disabled
   const [customAmount, setCustomAmount] = useState("");
   const [netSavings, setNetSavings] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
   const [warningData, setWarningData] = useState(null);
   const [savingsData, setSavingsData] = useState(null);
-  const [allocationMode, setAllocationMode] = useState("percentage"); // percentage or custom
+  // const [allocationMode, setAllocationMode] = useState("percentage"); // COMMENTED OUT - Using only custom mode
   const [badDayMode, setBadDayMode] = useState(false);
 
   useEffect(() => {
@@ -37,37 +37,41 @@ export default function SmartAllocation({ onAllocationComplete }) {
     }
   };
 
-  const handlePercentageChange = async (value) => {
-    const percent = parseInt(value);
-    setAllocationPercent(percent);
-    
-    await API.post("/set-savings-percentage", { percentage: percent });
-    
-    const availableToAllocate = savingsData?.available_savings || netSavings;
-    const amount = (availableToAllocate * percent) / 100;
-    setCustomAmount(amount.toFixed(0));
-  };
+  // COMMENTED OUT - Percentage mode handler
+  // const handlePercentageChange = async (value) => {
+  //   const percent = parseInt(value);
+  //   setAllocationPercent(percent);
+  //   
+  //   await API.post("/set-savings-percentage", { percentage: percent });
+  //   
+  //   const availableToAllocate = savingsData?.available_savings || netSavings;
+  //   const amount = (availableToAllocate * percent) / 100;
+  //   setCustomAmount(amount.toFixed(0));
+  // };
 
   const handleCustomAmountChange = (value) => {
     const amount = parseFloat(value);
     setCustomAmount(value);
     
     if (!isNaN(amount) && netSavings > 0) {
-      const percent = (amount / netSavings) * 100;
-      setAllocationPercent(Math.round(percent));
+      // const percent = (amount / netSavings) * 100; // COMMENTED OUT
+      // setAllocationPercent(Math.round(percent)); // COMMENTED OUT
     }
   };
 
   const handleAllocate = async () => {
     let amountToAllocate;
     
-    // FIXED: Correctly calculate amount for both modes
-    if (allocationMode === "percentage") {
-      const availableToAllocate = savingsData?.available_savings || netSavings;
-      amountToAllocate = (availableToAllocate * allocationPercent) / 100;
-    } else {
-      amountToAllocate = parseFloat(customAmount);
-    }
+    // COMMENTED OUT - Percentage mode
+    // if (allocationMode === "percentage") {
+    //   const availableToAllocate = savingsData?.available_savings || netSavings;
+    //   amountToAllocate = (availableToAllocate * allocationPercent) / 100;
+    // } else {
+    //   amountToAllocate = parseFloat(customAmount);
+    // }
+    
+    // USING ONLY CUSTOM AMOUNT
+    amountToAllocate = parseFloat(customAmount);
     
     if (isNaN(amountToAllocate) || amountToAllocate <= 0) {
       alert("Please enter a valid amount");
@@ -118,12 +122,13 @@ export default function SmartAllocation({ onAllocationComplete }) {
     return <div className="text-white">{t('loading') || 'Loading savings data...'}</div>;
   }
 
-  const recommendedAmount = savingsData.recommendations?.recommended ?? Math.round(netSavings * 0.5);
+  // const recommendedAmount = savingsData.recommendations?.recommended ?? Math.round(netSavings * 0.5); // COMMENTED OUT
   const availableToAllocate = savingsData?.available_savings || netSavings;
   const maxRecommended = availableToAllocate * 0.5;
-  const currentAllocation = allocationMode === "percentage" 
-    ? (availableToAllocate * allocationPercent) / 100 
-    : parseFloat(customAmount) || 0;
+  // const currentAllocation = allocationMode === "percentage"  // COMMENTED OUT
+  //   ? (availableToAllocate * allocationPercent) / 100 
+  //   : parseFloat(customAmount) || 0;
+  const currentAllocation = parseFloat(customAmount) || 0;
 
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 space-y-6">
@@ -145,8 +150,8 @@ export default function SmartAllocation({ onAllocationComplete }) {
         )}
       </div>
 
-      {/* Mode Selection */}
-      <div className="flex gap-4">
+      {/* COMMENTED OUT - Mode Selection Buttons */}
+      {/* <div className="flex gap-4">
         <button
           onClick={() => setAllocationMode("percentage")}
           className={`flex-1 py-2 rounded-lg transition ${
@@ -167,10 +172,10 @@ export default function SmartAllocation({ onAllocationComplete }) {
         >
           Custom Amount
         </button>
-      </div>
+      </div> */}
 
-      {/* Percentage Slider */}
-      {allocationMode === "percentage" && (
+      {/* COMMENTED OUT - Percentage Slider */}
+      {/* {allocationMode === "percentage" && (
         <div className="space-y-4">
           <div className="flex justify-between">
             <label className="text-slate-300">{t('allocation_percentage')}</label>
@@ -199,25 +204,23 @@ export default function SmartAllocation({ onAllocationComplete }) {
             <span>100% (All Savings)</span>
           </div>
         </div>
-      )}
+      )} */}
 
-      {/* Custom Amount Input */}
-      {allocationMode === "custom" && (
-        <div>
-          <label className="block mb-2 text-slate-300">{t('custom_amount')} (₹)</label>
-          <input
-            type="number"
-            value={customAmount}
-            onChange={(e) => handleCustomAmountChange(e.target.value)}
-            className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:outline-none"
-            placeholder="Enter amount to save"
-          />
-        </div>
-      )}
+      {/* Custom Amount Input - ALWAYS VISIBLE */}
+      <div>
+        <label className="block mb-2 text-slate-300">{t('custom_amount')} (₹)</label>
+        <input
+          type="number"
+          value={customAmount}
+          onChange={(e) => handleCustomAmountChange(e.target.value)}
+          className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:outline-none"
+          placeholder="Enter amount to save"
+        />
+      </div>
 
       {/* Current Allocation Preview */}
       <div className="bg-slate-800/50 rounded-xl p-4">
-          <p className="text-slate-300 mb-2">{t('allocation_percentage')}:</p>
+        <p className="text-slate-300 mb-2">Amount to Save:</p>
         <p className="text-xl font-bold">
           ₹{currentAllocation.toLocaleString()}
         </p>
@@ -225,7 +228,7 @@ export default function SmartAllocation({ onAllocationComplete }) {
           {((currentAllocation / availableToAllocate) * 100).toFixed(1)}% of available savings
         </p>
         
-        {/* Warning Indicator - FIXED to show proper message */}
+        {/* Warning Indicator */}
         {currentAllocation > maxRecommended && (
           <div className="mt-2 text-red-400 text-sm flex items-center gap-2">
             ⚠️ This exceeds the recommended 50% limit
@@ -234,9 +237,9 @@ export default function SmartAllocation({ onAllocationComplete }) {
         
         {/* Recommendation */}
         <div className="mt-3 pt-3 border-t border-slate-700">
-           <p className="text-sm text-green-400">
-             💡 Recommended: Save ₹{maxRecommended.toLocaleString()} (50% of available)
-           </p>
+          <p className="text-sm text-green-400">
+            💡 Recommended: Save ₹{maxRecommended.toLocaleString()} (50% of available)
+          </p>
         </div>
       </div>
 
@@ -253,11 +256,11 @@ export default function SmartAllocation({ onAllocationComplete }) {
         }`}
       >
         {netSavings > 0 && !badDayMode
-          ? `Allocate ₹${currentAllocation.toLocaleString()} to Goals`
+          ? `Save ₹${currentAllocation.toLocaleString()} to Goals`
           : badDayMode ? "Bad Day Mode Active - Savings Paused" : "No Savings Available"}
       </button>
 
-        {badDayMode && (
+      {badDayMode && (
         <div className="mt-3 p-3 bg-red-800/20 rounded text-red-200">
           {t('bad_day_message')}
         </div>
