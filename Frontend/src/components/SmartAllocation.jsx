@@ -43,7 +43,8 @@ export default function SmartAllocation({ onAllocationComplete }) {
     
     await API.post("/set-savings-percentage", { percentage: percent });
     
-    const amount = (netSavings * percent) / 100;
+    const availableToAllocate = savingsData?.available_savings || netSavings;
+    const amount = (availableToAllocate * percent) / 100;
     setCustomAmount(amount.toFixed(0));
   };
 
@@ -61,7 +62,8 @@ export default function SmartAllocation({ onAllocationComplete }) {
     let amountToAllocate;
     
     if (allocationMode === "percentage") {
-      amountToAllocate = (netSavings * allocationPercent) / 100;
+      const availableToAllocate = savingsData?.available_savings || netSavings;
+      const amount = (availableToAllocate * allocationPercent) / 100;
     } else {
       amountToAllocate = parseFloat(customAmount);
     }
@@ -116,9 +118,10 @@ export default function SmartAllocation({ onAllocationComplete }) {
   }
 
   const recommendedAmount = savingsData.recommendations?.recommended ?? Math.round(netSavings * 0.5);
-  const maxRecommended = netSavings * 0.5;
+  const availableToAllocate = savingsData?.available_savings || netSavings;
+  const maxRecommended = availableToAllocate * 0.5;
   const currentAllocation = allocationMode === "percentage" 
-    ? (netSavings * allocationPercent) / 100 
+    ? (availableToAllocate * allocationPercent) / 100 
     : parseFloat(customAmount) || 0;
 
   return (
